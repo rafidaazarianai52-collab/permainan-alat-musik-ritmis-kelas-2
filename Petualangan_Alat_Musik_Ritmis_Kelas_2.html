@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Petualangan Alat Musik Ritmis - Kelas 2</title>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:15px;background:linear-gradient(135deg,#edf8ff,#f8fff2);font-family:Arial,sans-serif;color:#20364d}
+.app{max-width:1000px;margin:auto;background:#fff;border-radius:26px;overflow:hidden;box-shadow:0 15px 45px #234c7320}
+header{background:linear-gradient(90deg,#3d7ed7,#4eae72);color:#fff;padding:18px 22px;display:flex;justify-content:space-between;font-weight:900;font-size:21px}
+.progress{height:9px;background:#e5edf5}.fill{height:100%;background:#ffd85a;width:0}
+main{padding:24px;min-height:650px}.screen{display:none}.active{display:block}.center{text-align:center}.hero{padding:30px 10px}.icons{font-size:65px}
+h1{font-size:40px;margin:10px}h2{font-size:28px}.sub{font-size:19px;line-height:1.5;color:#62748a}
+.info{max-width:800px;margin:20px auto;padding:18px;background:#f4f9ff;border:2px solid #dce8f5;border-radius:18px;text-align:left;line-height:1.7}
+button{border:0;border-radius:15px;padding:13px 21px;margin:6px;font-size:18px;font-weight:900;cursor:pointer;background:#3d7ed7;color:#fff;box-shadow:0 5px #2c61a6}
+button.green{background:#4eae72;box-shadow:0 5px #378652}button.yellow{background:#ffd85a;color:#604b00;box-shadow:0 5px #d0aa2b}button.gray{background:#eaf0f7;color:#345477;box-shadow:0 4px #c9d6e4}
+button:active{transform:translateY(3px);box-shadow:0 2px #aaa}.sound{display:inline-block;padding:9px 14px;border-radius:99px;background:#fff4cf;color:#755b00;font-weight:900}
+.top{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}.badge{background:#edf5ff;color:#3268a6;padding:8px 14px;border-radius:99px;font-weight:900}
+.card{max-width:860px;margin:18px auto;padding:22px;background:#f7fbff;border:2px solid #dce8f5;border-radius:22px;text-align:center}.q{font-size:25px;font-weight:900;margin-bottom:15px}
+.big{font-size:100px}.visuals{display:flex;justify-content:center;gap:14px;flex-wrap:wrap}.pic{width:140px;padding:10px;background:white;border:2px solid #dce7f2;border-radius:16px;font-weight:900}.pic span{display:block;font-size:55px;margin-bottom:5px}
+.options{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;max-width:840px;margin:18px auto}.opt{background:#fff;color:#20364d;box-shadow:none;border:3px solid #dbe7f3}.opt.correct{border-color:#4eae72;background:#eaf8ef}.opt.wrong{border-color:#e45b5b;background:#fff0f0}
+.feedback{text-align:center;min-height:48px;font-size:18px;font-weight:900}.good{color:#2e8950}.bad{color:#c94d4d}.hide{display:none}.final{font-size:55px;color:#3d7ed7;font-weight:900}.stars{font-size:35px}
+audio{width:min(500px,100%);margin:10px auto}
+@media(max-width:700px){h1{font-size:31px}.options{grid-template-columns:1fr}main{padding:15px}.big{font-size:82px}}
+</style>
+</head>
+<body><div class="app">
+<header><div>🥁 Petualangan Alat Musik Ritmis</div><div id="score">⭐ 0</div></header>
+<div class="progress"><div id="fill" class="fill"></div></div>
+<main>
+<section id="home" class="screen active"><div class="hero center">
+<div class="icons">🥁 🪇 🔺 👏 🔔</div>
+<h1>Petualangan Alat Musik Ritmis</h1>
+<p class="sub"><b>Kelas 2 SD</b><br>Kenali alat musik ritmis melalui gambar dan <b>suara alat musik</b>.</p>
+<button class="green" onclick="start()">▶ MULAI BERMAIN</button>
+<div class="info"><b>🔊 Versi suara asli:</b> game menggunakan rekaman alat musik dari sumber audio publik/CC0. Browser perlu terhubung ke internet agar audio dapat dimuat.<br><br>
+<b>🎧 Cara bermain:</b> klik <b>🔊 DENGARKAN SUARA</b>, dengarkan baik-baik, kemudian pilih alat musik yang benar.</div>
+</div></section>
+
+<section id="game" class="screen">
+<div class="top"><span id="badge" class="badge"></span><span class="sound">🔊 Audio aktif setelah tombol ditekan</span><span id="timer">⏱️ 20</span><b id="num"></b></div>
+<div class="card"><div id="q" class="q"></div><div id="content"></div>
+<button class="yellow" onclick="listen()">🔊 DENGARKAN SUARA</button>
+<div id="player"></div></div>
+<div id="options" class="options"></div><div id="feedback" class="feedback"></div>
+<div class="center"><button id="next" class="green hide" onclick="next()">➡ LANJUT</button></div>
+</section>
+
+<section id="result" class="screen"><div class="hero center">
+<div class="icons">🏆 🥁 ⭐</div><h1>Misi Selesai!</h1><div id="stars" class="stars"></div>
+<div id="final" class="final"></div><h2 id="msg"></h2><p id="summary" class="sub"></p>
+<button class="green" onclick="start()">🔄 MAIN LAGI</button><button class="gray" onclick="go('home')">🏠 MENU UTAMA</button>
+</div></section>
+</main></div>
+
+<script>
+const AUDIO={"marakas": "https://upload.wikimedia.org/wikipedia/commons/1/10/Maracas.ogg", "tamborin": "https://upload.wikimedia.org/wikipedia/commons/7/74/Tambourine.ogg", "triangle": "https://upload.wikimedia.org/wikipedia/commons/2/2e/LatinTriangle.ogg", "gong": "https://upload.wikimedia.org/wikipedia/commons/a/a8/Meditation_Gong.ogg", "kastanyet": "https://bigsoundbank.com/UPLOAD/mp3/0922.mp3", "drum": "https://bigsoundbank.com/UPLOAD/mp3/2402.mp3"};
+const A=[["Drum", "\ud83e\udd41", "drum", "Dipukul"], ["Tamborin", "\ud83e\ude98", "tamborin", "Dipukul atau digoyangkan"], ["Marakas", "\ud83e\ude87", "marakas", "Digoyangkan"], ["Triangle", "\ud83d\udd3a", "triangle", "Dipukul"], ["Kastanyet", "\ud83d\udc4f", "kastanyet", "Ditepukkan"], ["Gong", "\ud83d\udd14", "gong", "Dipukul"]];
+let Q=[],idx=0,score=0,correct=0,locked=false,heard=false,timerId=null,t=0,current=null;
+
+function sh(a){return [...a].sort(()=>Math.random()-.5)}
+function go(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function start(){
+ score=0;correct=0;idx=0;document.getElementById("score").textContent="⭐ 0";
+ Q=[
+ ["name",0,1,20,"Dengarkan baik-baik. Alat musik apakah yang kamu dengar?"],
+ ["name",2,1,20,"Dengarkan baik-baik. Alat musik apakah yang kamu dengar?"],
+ ["name",3,2,20,"Dengarkan baik-baik. Alat musik apakah yang kamu dengar?"],
+ ["name",5,2,20,"Dengarkan baik-baik. Alat musik apakah yang kamu dengar?"],
+ ["class",1,3,18,"Tamborin termasuk alat musik ..."],
+ ["class",4,3,18,"Kastanyet termasuk alat musik ..."],
+ ["way",2,4,18,"Bagaimana cara memainkan marakas?"],
+ ["way",3,4,18,"Bagaimana cara memainkan triangle?"],
+ ["clue",0,5,20,"Aku dimainkan dengan cara dipukul. Aku menghasilkan bunyi ketukan. Siapakah aku?"],
+ ["clue",5,5,20,"Aku berukuran besar dan menghasilkan bunyi yang panjang setelah dipukul. Siapakah aku?"],
+ ["odd",[0,2,3,5],6,20,"Tiga gambar menunjukkan alat musik ritmis yang berbeda dari satu pilihan. Pilih yang paling berbeda."],
+ ["soundtype",4,7,20,"Dengarkan bunyinya. Alat musik ini termasuk alat musik ..."],
+ ["pattern",[0,2,3],8,25,"Dengarkan tiga bunyi. Pilih urutan alat musik yang sama."]
+ ];
+ go("game");render();
+}
+function render(){
+ clearTimer();locked=false;heard=false;
+ let x=Q[idx],k=x[0],d=x[1];
+ document.getElementById("badge").textContent="Level "+x[2];
+ document.getElementById("num").textContent=`Soal ${idx+1}/${Q.length}`;
+ document.getElementById("fill").style.width=(idx/Q.length*100)+"%";
+ document.getElementById("q").textContent=x[4];
+ document.getElementById("feedback").textContent="";
+ document.getElementById("next").classList.add("hide");
+ document.getElementById("player").innerHTML="";
+ let c="",opts=[],ans;
+ if(k=="name"){c='<div class="big">👂</div>';opts=[d,...sh(A.map((_,i)=>i).filter(i=>i!=d)).slice(0,3)];ans=d}
+ if(k=="class"){c=`<div class="big">${A[d][1]}</div>`;opts=["Ritmis","Bukan ritmis"];ans="Ritmis"}
+ if(k=="way"){c=`<div class="big">${A[d][1]}</div><h2>${A[d][0]}</h2>`;opts=sh([A[d][3],"Ditiup","Dipukul","Digoyangkan"]).slice(0,3);if(!opts.includes(A[d][3]))opts[0]=A[d][3];ans=A[d][3]}
+ if(k=="clue"){c='<div class="big">🕵️</div>';opts=[d,...sh(A.map((_,i)=>i).filter(i=>i!=d)).slice(0,3)];ans=d}
+ if(k=="soundtype"){c='<div class="big">🔊</div>';opts=["Ritmis","Bukan ritmis"];ans="Ritmis"}
+ if(k=="odd"){c=`<div class="visuals">${d.map(i=>`<div class="pic"><span>${A[i][1]}</span>${A[i][0]}</div>`).join("")}</div>`;opts=d;ans=d[0]}
+ if(k=="pattern"){c='<div class="big">🎼</div>';let w=[];while(w.length<3){let s=sh(d);if(s.join()!=d.join()&&!w.some(z=>z.join()==s.join()))w.push(s)}opts=sh([d,...w]);ans=d}
+ document.getElementById("content").innerHTML=c;
+ window.ANS=ans;window.CUR=x;
+ let box=document.getElementById("options");box.innerHTML="";
+ opts.forEach(o=>{let b=document.createElement("button");b.className="opt";
+   if(["name","clue","odd"].includes(k))b.textContent=A[o][1]+" "+A[o][0];
+   else if(k=="pattern")b.textContent=o.map(i=>A[i][1]).join(" ");
+   else b.textContent=o;
+   b.onclick=()=>check(o,b);box.appendChild(b)
+ });
+ startTimer(x[3]);
+ if(["name","soundtype","pattern"].includes(k))setTimeout(listen,700);
+}
+function listen(){
+ heard=true;let x=window.CUR,k=x[0],d=x[1];
+ if(["name","soundtype","class","way","clue"].includes(k))play(d);
+ if(k=="pattern")d.forEach((n,i)=>setTimeout(()=>play(n),i*1000));
+}
+function play(i){
+ if(current){current.pause();current.currentTime=0}
+ current=new Audio(AUDIO[A[i][2]]);
+ current.preload="auto";current.controls=false;current.volume=1;
+ current.addEventListener("error",()=>{document.getElementById("player").innerHTML='<div style="color:#c94d4d;font-weight:900">⚠️ Suara tidak dapat dimuat. Pastikan internet aktif.</div>'});
+ current.play().catch(()=>{document.getElementById("player").innerHTML='<div style="color:#c94d4d;font-weight:900">⚠️ Tekan tombol DENGARKAN SUARA sekali lagi.</div>'});
+}
+function check(o,b){
+ if(locked)return;
+ let k=window.CUR[0],ok=k=="pattern"?JSON.stringify(o)==JSON.stringify(window.ANS):o===window.ANS;
+ if(ok){
+   locked=true;clearTimer();correct++;let p=heard?10:15;score+=p;
+   document.getElementById("score").textContent="⭐ "+score;
+   b.classList.add("correct");document.getElementById("feedback").textContent=`🎉 Benar! +${p} poin`;
+   document.getElementById("feedback").className="feedback good";
+   document.querySelectorAll(".opt").forEach(z=>z.disabled=true);
+   document.getElementById("next").classList.remove("hide");
+ }else{
+   b.classList.add("wrong");document.getElementById("feedback").textContent="😊 Belum tepat. Dengarkan lagi dan coba lagi!";
+   document.getElementById("feedback").className="feedback bad";setTimeout(()=>b.classList.remove("wrong"),450)
+ }
+}
+function next(){if(!locked)return;idx++;idx>=Q.length?result():render()}
+function startTimer(s){t=s;show();timerId=setInterval(()=>{t--;show();if(t<=0){clearTimer();locked=true;document.getElementById("feedback").textContent="⏰ Waktu habis. Klik LANJUT.";document.getElementById("feedback").className="feedback bad";document.getElementById("next").classList.remove("hide")}},1000)}
+function show(){document.getElementById("timer").textContent="⏱️ "+t}
+function clearTimer(){if(timerId)clearInterval(timerId);timerId=null}
+function result(){
+ clearTimer();go("result");document.getElementById("fill").style.width="100%";
+ document.getElementById("final").textContent=score+" poin";
+ let s=score>=110?5:score>=90?4:score>=70?3:score>=45?2:1;
+ document.getElementById("stars").textContent="⭐".repeat(s)+"☆".repeat(5-s);
+ document.getElementById("msg").textContent=s>=4?"Detektif Alat Musik Hebat! 🏆":s==3?"Bagus! 🌟":"Ayo berlatih lagi! 💪";
+ document.getElementById("summary").textContent=`Kamu menjawab ${correct} dari ${Q.length} soal dengan benar.`;
+}
+</script></body></html>
